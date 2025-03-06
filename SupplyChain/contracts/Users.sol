@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.28;
 
 import "./Types.sol";
@@ -15,7 +15,7 @@ contract Users {
         return users[id_];
     }
 
-    function add(Types.UserDetails memory user) internal {
+    function addUser(Types.UserDetails memory user) internal {
         users[user.id] = user;
 
         emit NewUser(user.name, user.role);
