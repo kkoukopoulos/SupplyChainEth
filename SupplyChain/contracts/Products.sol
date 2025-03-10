@@ -46,7 +46,7 @@ contract Products {
     function sell(address buyerId, address sellerId, string memory productId_, Types.User memory buyer, Types.User memory seller) internal {
         Types.Product memory product_ = product[productId_];
         userProducts[buyerId].push(productId_);
-        userProducts[sellerId].pop();
+        userProducts[sellerId].pop(); // pop() temporary, need proper logic
 
         emit ProductOwnershipTransfer(
             product_.name,
