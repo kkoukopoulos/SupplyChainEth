@@ -4,7 +4,7 @@ pragma solidity 0.8.28;
 import "./Types.sol";
 
 contract Users {
-    mapping(address => Types.User) internal users;
+    mapping(address => Types.User) internal user;
 
     event NewUser(
         string name,
@@ -12,12 +12,12 @@ contract Users {
     );
 
     function getUser(address id_) internal view returns (Types.User memory) {
-        return users[id_];
+        return user[id_];
     }
 
-    function addUser(Types.User memory user) internal {
-        users[user.id] = user;
+    function addUser(Types.User memory user_) internal {
+        user[user_.id] = user_;
 
-        emit NewUser(user.name, user.role);
+        emit NewUser(user_.name, user_.role);
     }
 }
