@@ -9,7 +9,7 @@ library Types {
         Customer
     }
     
-    struct UserDetails {
+    struct User {
         UserRole role;
         address id;
         string name;

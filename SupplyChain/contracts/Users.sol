@@ -4,18 +4,18 @@ pragma solidity 0.8.28;
 import "./Types.sol";
 
 contract Users {
-    mapping(address => Types.UserDetails) internal users;
+    mapping(address => Types.User) internal users;
 
     event NewUser(
         string name,
         Types.UserRole role
     );
 
-    function getUserDetails(address id_) internal view returns (Types.UserDetails memory) {
+    function getUser(address id_) internal view returns (Types.User memory) {
         return users[id_];
     }
 
-    function addUser(Types.UserDetails memory user) internal {
+    function addUser(Types.User memory user) internal {
         users[user.id] = user;
 
         emit NewUser(user.name, user.role);

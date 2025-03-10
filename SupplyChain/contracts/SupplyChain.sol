@@ -9,7 +9,7 @@ import "./Users.sol";
 
 contract SupplyChain is Users, Products {
     constructor(string memory name_) {
-        Types.UserDetails memory manufacturer_ = Types.UserDetails({role: Types.UserRole.Manufacturer, id: msg.sender, name: name_});
+        Types.User memory manufacturer_ = Types.User({role: Types.UserRole.Manufacturer, id: msg.sender, name: name_});
         addUser(manufacturer_);
     }
 
@@ -22,15 +22,15 @@ contract SupplyChain is Users, Products {
         return getUserProducts();
     }
 
-    function getDetails(address id_) public view returns (Types.UserDetails memory) {
-        return getUserDetails(id_);
+    function getDetails(address id_) public view returns (Types.User memory) {
+        return getUser(id_);
     }
 
-    function getMyDetails() public view returns (Types.UserDetails memory) {
-        return getUserDetails(msg.sender);
+    function getMyDetails() public view returns (Types.User memory) {
+        return getUser(msg.sender);
     }
 
-    function addNewUser(Types.UserDetails memory user) public onlyRole(Types.UserRole.Manufacturer) {
+    function addNewUser(Types.User memory user) public onlyRole(Types.UserRole.Manufacturer) {
         addUser(user);
     }
 
@@ -38,7 +38,7 @@ contract SupplyChain is Users, Products {
         addProduct(product_);
     }
 
-    function sellProduct(address buyerId_, address sellerId_, string memory productId_, Types.UserDetails memory buyer_, Types.UserDetails memory seller_) public {
+    function sellProduct(address buyerId_, address sellerId_, string memory productId_, Types.User memory buyer_, Types.User memory seller_) public {
         sell(buyerId_, sellerId_, productId_, buyer_, seller_);
     }
 }
