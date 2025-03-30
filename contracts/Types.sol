@@ -20,5 +20,6 @@ library Types {
         string productId;
         string manufacturerName;
         address manufacturer;
+        address ownerHistory;
     }
 }
