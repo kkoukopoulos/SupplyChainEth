@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 
-// TO DO: (1) timestamps [new user/product, transaction], (2) product owner history
-
 pragma solidity 0.8.28;
 
 import "./Products.sol";
@@ -20,6 +18,10 @@ contract SupplyChain is Users, Products {
 
     function getProducts() public view returns (Types.Product[] memory) {
         return getUserProducts();
+    }
+
+    function getProductOwnershipHistory(string memory productId_) public view returns (Types.ProductOwnerHistory[] memory) {
+        return productOwnerHistory[productId_];
     }
 
     function getDetails(address id_) public view returns (Types.User memory) {

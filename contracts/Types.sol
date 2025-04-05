@@ -20,6 +20,11 @@ library Types {
         string productId;
         string manufacturerName;
         address manufacturer;
-        address ownerHistory;
+        uint256 manufacturedTime;
+    }
+
+    struct ProductOwnerHistory {
+        address owner;
+        uint256 timestamp;
     }
 }

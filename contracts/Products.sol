@@ -7,12 +7,13 @@ contract Products {
     Types.Product[] internal products;
     mapping(string => Types.Product) internal product;
     mapping(address => string[]) internal userProducts;
-    mapping(string => address[]) public ownerHistory;
+    mapping(string => Types.ProductOwnerHistory[]) public productOwnerHistory;
 
     event NewProduct(
         string name,
         string manufacturerName,
-        string productId
+        string productId,
+        uint256 manufacturedTime
     );
 
     event ProductOwnershipTransfer(
@@ -20,7 +21,8 @@ contract Products {
         string manufacturerName,
         string productId,
         string buyerName,
-        string sellerName
+        string sellerName,
+        uint256 transferTime
     );
 
     function getUserProducts() internal view returns (Types.Product[] memory) {
@@ -32,20 +34,23 @@ contract Products {
         return products_;
     }
 
-    function productOwnerHistory(Types.Product memory product_) internal returns (Types.User[] memory) {
-
-    }
-
     function addProduct(Types.Product memory product_) internal {
         products.push(product_);
         product[product_.productId] = product_;
         userProducts[msg.sender].push(product_.productId);
-        ownerHistory[product_.productId].push(msg.sender);
+        // record sender to product owner history
+        productOwnerHistory[product_.productId].push(Types.ProductOwnerHistory({
+            owner: msg.sender,
+            timestamp: block.timestamp
+        }));
+        // record timestamp
+        product_.manufacturedTime = block.timestamp;
 
         emit NewProduct(
             product_.name,
             product_.manufacturerName,
-            product_.productId
+            product_.productId,
+            product_.manufacturedTime
         );
     }
 
@@ -70,14 +75,18 @@ contract Products {
         // add to buyer
         userProducts[buyerId].push(productId_);
         // record buyer to product owner history
-        ownerHistory[productId_].push(buyerId);
+        productOwnerHistory[productId_].push(Types.ProductOwnerHistory({
+            owner: buyerId,
+            timestamp: block.timestamp
+        }));
 
         emit ProductOwnershipTransfer(
             product_.name,
             product_.manufacturerName,
             product_.productId,
             buyer.name,
-            seller.name
+            seller.name,
+            block.timestamp
         );
     }
 }
