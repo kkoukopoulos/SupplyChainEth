@@ -5,17 +5,17 @@ import "./Types.sol";
 
 contract Users {
     uint public userCount = 0;
-    mapping (uint => Types.User) public users;
+    mapping(uint => Types.User) public users;
 
     event NewUser(
-        uint id,
+        address userAddress,
         string name,
         Types.UserRole role
     );
 
     function addUser(string memory _name, Types.UserRole _role) public {
         userCount += 1;
-        users[userCount] = Types.User(userCount, _name, _role);
-        emit NewUser(userCount, _name, _role);
+        users[userCount] = Types.User(msg.sender, _name, _role);
+        emit NewUser(msg.sender, _name, _role);
     }
 }

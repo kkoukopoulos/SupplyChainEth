@@ -10,7 +10,7 @@ library Types {
     }
     
     struct User {
-        uint id;
+        address userAddress;
         string name;
         UserRole role;
     }

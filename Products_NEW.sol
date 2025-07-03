@@ -2,11 +2,12 @@
 pragma solidity 0.8.30;
 
 import "./Types.sol";
+import "./Users.sol";
 
 contract Products {
     Types.Product[] public products;
     mapping(address => string[]) public userProducts;
-    mapping (address => Types.User) public userAddress;
+    mapping(address => Types.User) public userAddress;
     mapping(string => Types.ProductHistory[]) public productHistory;
 
     event NewProduct(
@@ -44,9 +45,9 @@ contract Products {
         );
     }
 
-    function sell(address buyerId, address sellerId, string memory _barcode) public {
+    function sell(address buyerId, string memory _barcode) public {
         Types.Product memory _product = products[_barcode];
-        string[] storage sellerProducts = userProducts[sellerId];
+        string[] storage sellerProducts = userProducts[msg.sender];
         // find product index
         uint256 productIndex = sellerProducts.length;
         for (uint256 i = 0; i < sellerProducts.length; i++) {
@@ -75,7 +76,7 @@ contract Products {
             _product.manufacturerName,
             _product.barcode,
             buyer.name,
-            seller.name,
+            msg.sender.name,
             block.timestamp
         );
     }
