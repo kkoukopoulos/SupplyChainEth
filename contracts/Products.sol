@@ -1,91 +1,110 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.28;
+pragma solidity 0.8.30;
 
 import "./Types.sol";
+import "./Users.sol";
 
 contract Products {
-    Types.Product[] internal products;
-    mapping(string => Types.Product) internal product;
-    mapping(address => string[]) internal userProducts;
-    mapping(string => Types.ProductOwnerHistory[]) public productOwnerHistory;
+    Users public users;
+    Types.Product[] public products;
+    mapping(address => string[]) public userProducts;
+    mapping(string => Types.ProductHistory[]) public productHistory;
 
     event NewProduct(
         string name,
         string manufacturerName,
-        string productId,
-        uint256 manufacturedTime
+        string barcode,
+        string manufacturedTime
     );
 
     event ProductOwnershipTransfer(
         string name,
         string manufacturerName,
-        string productId,
+        string barcode,
         string buyerName,
         string sellerName,
         uint256 transferTime
     );
 
-    function getUserProducts() internal view returns (Types.Product[] memory) {
-        string[] memory ids = userProducts[msg.sender];
-        Types.Product[] memory products_ = new Types.Product[](ids.length);
-        for (uint256 i = 0; i < ids.length; i++) {
-            products_[i] = product[ids[i]];
-        }
-        return products_;
+    modifier onlyManufacturer() {
+        Types.User memory usr = users.getUser(msg.sender);
+        require(usr.role == Types.UserRole.Manufacturer, "Only manufacturer can add products.");
+        _;
     }
 
-    function addProduct(Types.Product memory product_) internal {
-        products.push(product_);
-        product[product_.productId] = product_;
-        userProducts[msg.sender].push(product_.productId);
-        // record sender to product owner history
-        productOwnerHistory[product_.productId].push(Types.ProductOwnerHistory({
+    function addProduct(
+        string memory _name,
+        string memory _manufacturerName,
+        string memory _barcode,
+        string memory _manufacturedTime
+    ) public onlyManufacturer {
+        products.push(Types.Product(_name, _manufacturerName, _barcode, _manufacturedTime));
+        Types.Product memory _product = products[products.length - 1];
+
+        // Save barcode under sender's products
+        userProducts[msg.sender].push(_barcode);
+
+        productHistory[_product.barcode].push(Types.ProductHistory({
             owner: msg.sender,
             timestamp: block.timestamp
         }));
-        // record timestamp
-        product_.manufacturedTime = block.timestamp;
 
         emit NewProduct(
-            product_.name,
-            product_.manufacturerName,
-            product_.productId,
-            product_.manufacturedTime
+            _product.name,
+            _product.manufacturerName,
+            _product.barcode,
+            _product.manufacturedTime
         );
     }
 
-    function sell(address buyerId, address sellerId, string memory productId_, Types.User memory buyer, Types.User memory seller) internal {
-        Types.Product memory product_ = product[productId_];
-        string[] storage sellerProducts = userProducts[sellerId];
-        // find product index
+    function sell(address buyer, string memory _barcode) public {
+        // Find product
+        Types.Product memory _product;
+        bool found = false;
+        for (uint i = 0; i < products.length; i++) {
+            if (keccak256(bytes(products[i].barcode)) == keccak256(bytes(_barcode))) {
+                _product = products[i];
+                found = true;
+                break;
+            }
+        }
+        require(found, "Product not found");
+
+        // Ensure seller owns it
+        string[] storage sellerProducts = userProducts[msg.sender];
         uint256 productIndex = sellerProducts.length;
         for (uint256 i = 0; i < sellerProducts.length; i++) {
-            if (keccak256(bytes(sellerProducts[i])) == keccak256(bytes(productId_))) {
+            if (keccak256(bytes(sellerProducts[i])) == keccak256(bytes(_barcode))) {
                 productIndex = i;
                 break;
             }
         }
-        require(productIndex < sellerProducts.length, "Product not found in seller's inventory");
-        // swap with last element
+        require(productIndex < sellerProducts.length, "Product not in seller inventory");
+
+        // Remove from seller
         if (productIndex < sellerProducts.length - 1) {
             sellerProducts[productIndex] = sellerProducts[sellerProducts.length - 1];
         }
-        // remove from seller
         sellerProducts.pop();
-        // add to buyer
-        userProducts[buyerId].push(productId_);
-        // record buyer to product owner history
-        productOwnerHistory[productId_].push(Types.ProductOwnerHistory({
-            owner: buyerId,
+
+        // Add to buyer
+        userProducts[buyer].push(_barcode);
+
+        // Log new owner
+        productHistory[_barcode].push(Types.ProductHistory({
+            owner: buyer,
             timestamp: block.timestamp
         }));
 
+        string memory buyerName = users.getUser(buyer).name;
+        string memory sellerName = users.getUser(msg.sender).name;
+
         emit ProductOwnershipTransfer(
-            product_.name,
-            product_.manufacturerName,
-            product_.productId,
-            buyer.name,
-            seller.name,
+            _product.name,
+            _product.manufacturerName,
+            _product.barcode,
+            buyerName,
+            sellerName,
             block.timestamp
         );
     }

@@ -1,23 +1,31 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.28;
+pragma solidity 0.8.30;
 
 import "./Types.sol";
 
 contract Users {
-    mapping(address => Types.User) internal user;
+    uint public userCount = 0;
+    mapping(address => Types.User) public users;
 
     event NewUser(
+        address userAddress,
         string name,
         Types.UserRole role
     );
 
-    function getUser(address id_) internal view returns (Types.User memory) {
-        return user[id_];
+    function addUser(string memory _name,Types.UserRole _role) public {
+        userCount += 1;
+        users[msg.sender] = Types.User(msg.sender, _name, _role);
+        emit NewUser(msg.sender, _name, _role);
     }
 
-    function addUser(Types.User memory user_) internal {
-        user[user_.id] = user_;
+    function getUserInfo(address _addr) external view returns (string memory name, Types.UserRole role) {
+        Types.User memory usr = users[_addr];
+        return (usr.name, usr.role);
+    }
 
-        emit NewUser(user_.name, user_.role);
+    function getUser(address _addr) external view returns (Types.User memory) {
+        Types.User memory usr = users[_addr];
+        return usr;
     }
 }

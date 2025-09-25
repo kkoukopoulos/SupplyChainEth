@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.28;
+pragma solidity 0.8.30;
 
 library Types {
     enum UserRole {
@@ -10,20 +10,19 @@ library Types {
     }
     
     struct User {
-        UserRole role;
-        address id;
+        address userAddress;
         string name;
+        UserRole role;
     }
 
     struct Product {
         string name;
-        string productId;
         string manufacturerName;
-        address manufacturer;
-        uint256 manufacturedTime;
+        string barcode;
+        string manufacturedTime;
     }
 
-    struct ProductOwnerHistory {
+    struct ProductHistory {
         address owner;
         uint256 timestamp;
     }
